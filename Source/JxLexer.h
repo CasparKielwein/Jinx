@@ -18,7 +18,7 @@ namespace Jinx::Impl
 		Symbol() :
 			Symbol(SymbolType::None, 0, 0)
 		{}
-		Symbol(SymbolType t, int32_t ln, int32_t cn) :
+		Symbol(SymbolType t, uint32_t ln, uint32_t cn) :
 			type(t),
 			numVal(0),
 			lineNumber(ln),
@@ -43,7 +43,7 @@ namespace Jinx::Impl
 	{
 	public:
 		// Lex the script text
-		Lexer(const SymbolTypeMap & symbolTypeMap, const char * start, const char * end, const String & name);
+		Lexer(const SymbolTypeMap & symbolTypeMap, const char * start, const char * end, String name);
 
 		// Do lexing pass to create token list
 		bool Execute();
@@ -75,15 +75,15 @@ namespace Jinx::Impl
 		void CreateSymbolString(String && text);
 
 		// Character queries
-		inline bool IsEndOfText() const { return (!(*m_current) || m_current > m_end) ? true : false; }
+		inline bool IsEndOfText() const { return (!(*m_current) || m_current > m_end); }
 		bool IsName(const char * ptr) const;
 		bool IsNameStart(const char * ptr) const;
-		inline bool IsNewline(unsigned char c) const { return (c == '\r' || c == '\n') ? true : false; }
-		inline bool IsWhitespace(unsigned char c) const { return (c == ' ' || c == '\t') ? true : false; }
-		bool IsNextCharacter(unsigned char c) const;
+		inline bool IsNewline(char c) const { return (c == '\r' || c == '\n'); }
+		inline bool IsWhitespace(char c) const { return (c == ' ' || c == '\t'); }
+		bool IsNextCharacter(char c) const;
 		bool IsNextDigit() const;
-		bool IsNumber(unsigned char c) const { return std::isdigit(c) != 0 || c == '.'; }
-		bool IsNumberStart(unsigned char c) const { return std::isdigit(c) != 0 || c == '.' || c == '-'; }
+		bool IsNumber(char c) const { return std::isdigit(c) != 0 || c == '.'; }
+		bool IsNumberStart(char c) const { return std::isdigit(c) != 0 || c == '.' || c == '-'; }
 
 		// Text parsing functions
 		void AdvanceCurrent();

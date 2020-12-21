@@ -10,8 +10,8 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline_t Lexer::Lexer(const SymbolTypeMap & symbolTypeMap, const char * start, const char * end, const String & name) :
-		m_name(name),
+	inline_t Lexer::Lexer(const SymbolTypeMap & symbolTypeMap, const char * start, const char * end, String name) :
+		m_name(std::move(name)),
 		m_start(start),
 		m_end(end),
 		m_current(nullptr),
@@ -112,7 +112,7 @@ namespace Jinx::Impl
 				break;
 
 			// Check for operators first
-			unsigned char c = *m_current;
+			const char c = *m_current;
 			switch (c)
 			{
 			case '-':
@@ -221,7 +221,7 @@ namespace Jinx::Impl
 				}
 				continue;
 			}
-			};
+			}
 
 			// Check for errors
 			if (m_error)
@@ -259,7 +259,7 @@ namespace Jinx::Impl
 		return true;
 	}
 
-	inline_t bool Lexer::IsNextCharacter(unsigned char c) const
+	inline_t bool Lexer::IsNextCharacter(char c) const
 	{
 		if (IsEndOfText())
 			return false;
@@ -412,7 +412,8 @@ namespace Jinx::Impl
 			}
 			AdvanceCurrent();
 		}
-		size_t count = m_current - startName;
+                assert(m_current >= startName);
+		auto count = static_cast<size_t>(m_current - startName);
 		if (quotedName)
 			AdvanceCurrent();
 		auto name = String(startName, count);
@@ -462,12 +463,12 @@ namespace Jinx::Impl
 			Error("Invalid number format");
 		else if (points == 0)
 		{
-			int64_t integer = atol(reinterpret_cast<const char *>(startNum));
+			int64_t integer = atol(startNum);
 			CreateSymbol(integer);
 		}
 		else
 		{
-			double number = atof(reinterpret_cast<const char *>(startNum));
+			double number = atof(startNum);
 			CreateSymbol(number);
 		}
 	}
@@ -498,7 +499,8 @@ namespace Jinx::Impl
 			Error("Could not find matching quote");
 			return;
 		}
-		size_t count = m_current - startName;
+                assert(m_current >= startName);
+		auto count = static_cast<size_t>(m_current - startName);
 		auto str = String(startName, count);
 		CreateSymbolString(std::move(str));
 	}
