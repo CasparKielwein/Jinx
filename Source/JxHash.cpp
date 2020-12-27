@@ -15,7 +15,7 @@ namespace Jinx::Impl
 		const uint32_t m = 0x5bd1e995;
 		const int r = 24;
 
-		uint32_t h = seed ^ len;
+		uint32_t h = seed ^ (unsigned int)len;
 
 		const unsigned char * data = (const unsigned char *)key;
 

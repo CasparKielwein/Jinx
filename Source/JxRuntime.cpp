@@ -317,7 +317,7 @@ namespace Jinx::Impl
 		bool newLine = true;
 
 		// Store offset of first symbol
-		auto offset = 0;
+		auto offset = 0u;
 		if (!symbolList.empty())
 			offset = symbolList.begin()->columnNumber;
 
@@ -371,7 +371,7 @@ namespace Jinx::Impl
 			default:
 				LogWrite(LogLevel::Info, "%s ", GetSymbolTypeText(symbol->type));
 				break;
-			};
+			}
 		}
 		LogWrite(LogLevel::Info, "\nLine Count: %i\n\n", lineCount);
 	}
