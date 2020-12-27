@@ -108,7 +108,7 @@ add_library(${PROJECT_NAME} ${jinx_source_list})
 if(MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /permissive- /W4 /w45038 /WX /utf-8)
 else()
-	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wconversion -Wsign-conversion -pedantic -Werror)
 endif()
 
 # Create IDE folder structure
