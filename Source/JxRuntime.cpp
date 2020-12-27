@@ -78,10 +78,10 @@ namespace Jinx::Impl
 
 		// Track accumulated script compilation time and count
 		auto end = std::chrono::high_resolution_clock::now();
-		uint64_t compilationTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+		auto compilationTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 		std::lock_guard<std::mutex> lock(m_perfMutex);
 		m_perfStats.scriptCompilationCount++;
-		m_perfStats.compilationTimeNs += compilationTimeNs;
+		m_perfStats.compilationTimeNs += static_cast<uint64_t>(compilationTimeNs);
 
 		// Return the bytecode
 		return parser.GetBytecode();
@@ -142,7 +142,7 @@ namespace Jinx::Impl
 	{
 		std::lock_guard<std::mutex> lock(m_perfMutex);
 		auto end = std::chrono::high_resolution_clock::now();
-		m_perfStats.perfTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - m_perfStartTime).count();
+		m_perfStats.perfTimeNs = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - m_perfStartTime).count());
 		PerformanceStats s = m_perfStats;
 		if (resetStats)
 		{

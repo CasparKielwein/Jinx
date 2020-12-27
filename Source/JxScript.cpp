@@ -815,7 +815,7 @@ namespace Jinx::Impl
 				assert(!m_stack.empty());
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-				int32_t stackIndex;
+				uint32_t stackIndex;
 				m_execution.back().reader.Read(&stackIndex);
 				ValueType type;
 				m_execution.back().reader.Read<ValueType, uint8_t>(&type);
@@ -984,8 +984,8 @@ namespace Jinx::Impl
 
 		// Track accumulated script execution time
 		auto end = std::chrono::high_resolution_clock::now();
-		uint64_t executionTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
-		m_runtime->AddPerformanceParams(m_finished, executionTimeNs, tickInstCount);
+		auto executionTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+		m_runtime->AddPerformanceParams(m_finished, static_cast<uint64_t>(executionTimeNs), tickInstCount);
 
 		return true;
 	}
