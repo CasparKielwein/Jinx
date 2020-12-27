@@ -23,7 +23,7 @@ namespace Jinx::Impl
 			3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3, 4,4,4,4,4,4,4,4,5,5,5,5,6,6,6,6,
 		};
 
-		static inline uint32_t fastFold[128] = {
+		static inline char fastFold[128] = {
 			0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,
 			0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
 			0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2A,0x2B,0x2C,0x2D,0x2E,0x2F,
@@ -129,8 +129,8 @@ namespace Jinx::Impl
 				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 				return;
 			}
-			utf8Out[0] = uint8_t(utf32CodePoint >> 6) | 0xC0;
-			utf8Out[1] = (uint8_t(utf32CodePoint >> 0) & 0x3F) | 0x80;
+			utf8Out[0] = char(uint8_t(utf32CodePoint >> 6) | 0xC0);
+			utf8Out[1] = char((uint8_t(utf32CodePoint >> 0) & 0x3F) | 0x80);
 			*numCharsOut = 2;
 		}
 		else if (utf32CodePoint < 0x010000)
@@ -140,9 +140,9 @@ namespace Jinx::Impl
 				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 				return;
 			}
-			utf8Out[0] = (uint8_t(utf32CodePoint >> 12) & 0x0F) | 0xE0;
-			utf8Out[1] = (uint8_t(utf32CodePoint >> 6) & 0x3F) | 0x80;
-			utf8Out[2] = (uint8_t(utf32CodePoint >> 0) & 0x3F) | 0x80;
+			utf8Out[0] = char((uint8_t(utf32CodePoint >> 12) & 0x0F) | 0xE0);
+			utf8Out[1] = char((uint8_t(utf32CodePoint >> 6) & 0x3F) | 0x80);
+			utf8Out[2] = char((uint8_t(utf32CodePoint >> 0) & 0x3F) | 0x80);
 			*numCharsOut = 3;
 		}
 		else if (utf32CodePoint < 0x110000)
@@ -152,10 +152,10 @@ namespace Jinx::Impl
 				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 				return;
 			}
-			utf8Out[0] = (uint8_t(utf32CodePoint >> 18) & 0x07) | 0xF0;
-			utf8Out[1] = (uint8_t(utf32CodePoint >> 12) & 0x3F) | 0x80;
-			utf8Out[2] = (uint8_t(utf32CodePoint >> 6) & 0x3F) | 0x80;
-			utf8Out[3] = (uint8_t(utf32CodePoint >> 0) & 0x3F) | 0x80;
+			utf8Out[0] = char((uint8_t(utf32CodePoint >> 18) & 0x07) | 0xF0);
+			utf8Out[1] = char((uint8_t(utf32CodePoint >> 12) & 0x3F) | 0x80);
+			utf8Out[2] = char((uint8_t(utf32CodePoint >> 6) & 0x3F) | 0x80);
+			utf8Out[3] = char((uint8_t(utf32CodePoint >> 0) & 0x3F) | 0x80);
 			*numCharsOut = 4;
 		}
 		else
@@ -247,7 +247,7 @@ namespace Jinx::Impl
 		}
 
 		// Retrieve UTF-8 character size from lookup table
-		unsigned char c = utf8Str[0];
+		int c = utf8Str[0];
 		size_t s = Impl::UnicodeData::sizeUTF8[c];
 
 		// While values of 5 or 6 bytes are technically possible, it is not a valid UTF-8 sequence
@@ -357,10 +357,10 @@ namespace Jinx::Impl
 		while (curr < end)
 		{
 			// ASCII characters can do a fast table-based check
-			unsigned char c = *curr;
+			auto c = *curr;
 			if (!((c & 0x80) == 0x80))
 			{
-				if (Impl::UnicodeData::fastFold[c] != c)
+				if (Impl::UnicodeData::fastFold[static_cast<int>(c)] != c)
 					return false;
 				++curr;
 			}
@@ -369,7 +369,7 @@ namespace Jinx::Impl
 			{
 				char32_t codepoint = 0;
 				size_t charsOut = 0;
-				Impl::ConvertUtf8ToUtf32(curr, end - curr, &codepoint, &charsOut);
+				Impl::ConvertUtf8ToUtf32(curr, static_cast<size_t>(end - curr), &codepoint, &charsOut);
 				if (FindCaseFoldingData(codepoint, nullptr, nullptr))
 					return false;
 				curr += charsOut;
@@ -391,10 +391,10 @@ namespace Jinx::Impl
 		while (curr < end)
 		{
 			// Attempt simple (ASCII-only) folding if possible first
-			unsigned char c = *curr;
+			auto c = *curr;
 			if (!((c & 0x80) == 0x80))
 			{
-				s.push_back(static_cast<unsigned char>(Impl::UnicodeData::fastFold[c]));
+				s.push_back(static_cast<char>(Impl::UnicodeData::fastFold[static_cast<int>(c)]));
 				++curr;
 			}
 			// Non-ASCII codepoints require lookups via the global folding map
@@ -402,7 +402,7 @@ namespace Jinx::Impl
 			{
 				char32_t codepoint = 0;
 				size_t charsOut = 0;
-				Impl::ConvertUtf8ToUtf32(curr, end - curr, &codepoint, &charsOut);
+				Impl::ConvertUtf8ToUtf32(curr, static_cast<size_t>(end - curr), &codepoint, &charsOut);
 
 				char32_t cp1 = 0;
 				char32_t cp2 = 0;
